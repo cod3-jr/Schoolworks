@@ -1,0 +1,21 @@
+1
+Hudson Bay
+4324.31
+2
+Zellers
+7813.81
+3
+Pizza Hut
+3444.41
+4
+Goodfella's
+33513.8
+5
+Apple
+129594
+6
+Brooklyn College
+504029
+7
+Pete's
+1494.23

@@ -1,0 +1,53 @@
+if(masterFile.is_open())
+{
+
+int i = 0;
+while (!masterFile.eof())
+{
+masterFile >> record[i].id; //read in record
+masterFile >> record[i].name;
+masterFile >> record[i].balance;
+
+transFile.open("Transactions.txt");
+int y = 0;
+while (!transFile.eof())    //cycle through transactions for each masterFile Record
+{
+transFile >> trans[y].type; //read in transaction
+transFile >> trans[y].id;
+transFile >> trans[y].transNum;
+
+if (record[i].id == trans[y].id) //if id's match, update balance
+{
+if ((trans[y].type = 'O')) //if Order
+{
+transFile >> trans[y].item; //read in order details
+transFile >> trans[y].amount;
+transFile >> trans[y].price;
+
+purchase = (trans[y].amount * trans[y].price); //calculate total cost
+
+record[i].balance += purchase;
+running += purchase;
+y++;
+
+}
+else    //if Payment
+{
+transFile >> trans[y].payment;
+record[i].balance -= trans[y].payment;
+running -= trans[y].payment;
+y++;
+}
+}
+}
+transFile.close();
+}
+cout << record[i].balance;
+
+masterFile.close();
+}
+
+else cout << "Unable to open files";
+
+
+transFile.close();

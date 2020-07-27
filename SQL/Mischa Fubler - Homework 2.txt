@@ -1,0 +1,102 @@
+Homework 1
+
+DDL
+	product(productid,description)
+	customer(customerid,username,fname,lname,street1,street2,city,state,zip)
+	purchase(purchaseid,purchasetimestamp,customerid,productid,quantity,price)
+
+DML
+ 1. What is the description of productid=42?
+	SELECT description
+	FROM product
+	WHERE productid = 42;
+
+ 2. What's the name and address of customerid=42?
+	SELECT fname, lname, street1, street2, city, state, zip
+	FROM customer
+	WHERE customerid = 42;
+
+ 3. What products did customerid=42 purchase?
+	SELECT b.productid, b.description
+	FROM purchase a
+		INNER JOIN product b
+		on a.productid = b.productid
+	WHERE a.customerid = 42
+	GROUP BY productid;
+
+ 4. List customer names who have never puchased anything.
+	SELECT a.fname, a.lname
+	FROM customer a
+		left join purchase b
+		on a.customerid = b.customerid
+	GROUP BY a.customerid, a.fname, a.lname
+	HAVING count(b.customerid) < 1
+	ORDER BY a.customerid;
+
+ 5. List product descriptions who have never been purcahsed by anyone.
+	SELECT a.*
+	FROM product a
+		left join purchase b
+		on a.productid = b.productid
+	GROUP BY a.productid
+	HAVING count(b.productid) < 1
+	ORDER BY a.productid;
+
+
+ 6. What products were purchased by customers with zip code 10001?
+	SELECT pr.*
+	FROM customer c
+		INNER JOIN purchase pu
+		ON c.customerid = pu.customerid
+		JOIN product pr
+		ON pu.productid = pr.productid
+	WHERE zip LIKE '10001'
+	GROUP BY pr.productid
+	HAVING count(pu.productid) > 0
+	ORDER BY pr.productid
+	;
+
+ 7. What percentage of customers have ever purchased productid=42?
+ 	SELECT round((count(distinct p.customerid) * 100.0 / (SELECT count(c.customerid) from customer c)), 2) as pct
+	FROM purchase p
+	WHERE productid = 42
+	;
+
+	-- Prof suggested implementation. But what about a customer buying 42 more than once?
+	SELECT round((sum(CASE p.productid WHEN 42 THEN 1 ELSE 0 END) * 100.0 / (SELECT sum(1) from customer c)), 2) as pct
+	FROM purchase p
+	;
+
+ 8. Of customers who purchased productid=42, what percentage also purchased productid=24?
+	With prod42s as(
+	SELECT distinct customerid cust
+	FROM purchase
+	WHERE productid = 42
+	)
+	SELECT round((count(p42.cust) * 100.0/ (SELECT count(cust) from prod42s)), 2)
+	FROM prod42s p42
+		INNER JOIN purchase p
+		ON p42.cust = p.customerid
+	WHERE productid = 24
+	;
+
+ 9. What is the most popular (purchased most often) product in NY state?
+ 	SELECT p.productid, count(p.purchaseid) as timessold, sum(quantity) as amtsold
+	FROM customer c
+		INNER JOIN purchase p
+		ON c.customerid = p.customerid
+	WHERE state = 'NY'
+	GROUP BY p.productid
+	ORDER BY timessold DESC, amtsold DESC, p.productid
+	LIMIT 1
+	;
+
+ 10. What is the most popular (purchased most often) product in North East?
+ 	SELECT p.productid, count(p.purchaseid) as timessold, sum(quantity) as amtsold
+	FROM customer c
+		INNER JOIN purchase p
+		ON c.customerid = p.customerid
+	WHERE state IN ('CT','MA','ME','NH','NY','NJ','PA','RI','VT')
+	GROUP BY p.productid
+	ORDER BY timessold DESC, amtsold DESC, p.productid
+	LIMIT 1;
